@@ -15,174 +15,172 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # In[2]:
 
-
-executable_path = {'executable_path': ChromeDriverManager().install()}
-browser = Browser('chrome', **executable_path, headless=False)
+def init_browser():
+    executable_path = {'executable_path': ChromeDriverManager().install()}
+    return Browser('chrome', **executable_path, headless=False)
 
 
 # In[3]:
 
-
+def scrape():
+    browser = init_browser()
+    mars_dict = {}
 # News site
-url = 'https://redplanetscience.com/'
-browser.visit(url)
-html = browser.html
+    url = 'https://redplanetscience.com/'
+    browser.visit(url)
+    html = browser.html
 
-news_soup = bs(html, 'html.parser')
-
-
-# In[4]:
+    news_soup = bs(html, 'html.parser')
 
 
-# Retrieve latest news title and paragraph
-news_title = news_soup.find_all('div', class_='content_title')[0].text
-news_p = news_soup.find_all('div', class_='article_teaser_body')[0].text
-
-print(news_title)
-print('-----------------------------------------------------')
-print(news_p)
+    # In[4]:
 
 
-# In[5]:
+    # Retrieve latest news title and paragraph
+    news_title = news_soup.find_all('div', class_='content_title')[0].text
+    news_p = news_soup.find_all('div', class_='article_teaser_body')[0].text
+
+    print(news_title)
+    print('-----------------------------------------------------')
+    print(news_p)
 
 
-# JPL Mars Space Images - Featured Image
+    # In[5]:
 
 
-# In[6]:
+    # JPL Mars Space Images - Featured Image
 
 
-# Mars Image
-
-images_url = 'https://spaceimages-mars.com/'
-browser.visit(images_url)
+    # In[6]:
 
 
-# In[7]:
+    # Mars Image
+
+    images_url = 'https://spaceimages-mars.com/'
+    browser.visit(images_url)
 
 
-image_html = browser.html
-
-images_soup = bs(image_html, 'html.parser')
+    # In[7]:
 
 
-# In[8]:
+    image_html = browser.html
+
+    images_soup = bs(image_html, 'html.parser')
 
 
-relative_image_path = images_soup.find_all('img')[1]['src']
-featured_image_url = images_url + relative_image_path
-print(featured_image_url)
+    # In[8]:
 
 
-# In[9]:
+    relative_image_path = images_soup.find_all('img')[1]['src']
+    featured_image_url = images_url + relative_image_path
+    print(featured_image_url)
 
 
-# Mars Facts
-facts_url = 'https://galaxyfacts-mars.com/'
-browser.visit(facts_url)
-facts_html = browser.html
-
-facts_soup = bs(html, 'html.parser')
+    # In[9]:
 
 
-# In[10]:
+    # Mars Facts
+    facts_url = 'https://galaxyfacts-mars.com/'
+    browser.visit(facts_url)
+    facts_html = browser.html
+
+    facts_soup = bs(html, 'html.parser')
 
 
-tables = pd.read_html(facts_url)
-tables
+    # In[10]:
 
 
-# In[11]:
+    tables = pd.read_html(facts_url)
+    tables
 
 
-mars_facts_df = tables[1]
-mars_facts_df.columns = ["Description", "Value"]
-mars_facts_df
+    # In[11]:
 
 
-# In[12]:
+    mars_facts_df = tables[1]
+    mars_facts_df.columns = ["Description", "Value"]
+    mars_facts_df
 
 
-mars_html_table = mars_facts_df.to_html()
-mars_html_table
+    # In[12]:
 
 
-# In[13]:
+    mars_html_table = mars_facts_df.to_html()
+    mars_html_table
 
 
-mars_html_table.replace('\n', '')
+    # In[13]:
 
 
-# In[14]:
+    mars_html_table.replace('\n', '')
 
 
-print(mars_html_table)
+    # In[14]:
 
 
-# In[15]:
+    print(mars_html_table)
 
 
-# Mars Hemispheres
-hemispheres_url = 'https://marshemispheres.com/'
-browser.visit(hemispheres_url)
-hemispheres_html = browser.html
-hemispheres_soup = bs(hemispheres_html, 'html.parser')
+    # In[15]:
 
 
-# In[19]:
+    # Mars Hemispheres
+    hemispheres_url = 'https://marshemispheres.com/'
+    browser.visit(hemispheres_url)
+    hemispheres_html = browser.html
+    hemispheres_soup = bs(hemispheres_html, 'html.parser')
 
 
-all_mars_hemispheres = hemispheres_soup.find('div', class_='collapsible results')
-mars_hemispheres = all_mars_hemispheres.find_all('div', class_='item')
+    # In[19]:
 
-hemisphere_image_urls = []
+
+    all_mars_hemispheres = hemispheres_soup.find('div', class_='collapsible results')
+    mars_hemispheres = all_mars_hemispheres.find_all('div', class_='item')
+
+    hemisphere_image_urls = []
 
 # Iterate through each hemisphere data
-for i in mars_hemispheres:
-    # Collect Title
-    hemisphere = i.find('div', class_="description")
-    title = hemisphere.h3.text
-    
-    # Collect image link by browsing to hemisphere page
-    hemisphere_link = hemisphere.a["href"]    
-    browser.visit(hemispheres_url + hemisphere_link)
-    
-    image_html = browser.html
-    image_soup = bs(image_html, 'html.parser')
-    
-    image_link = image_soup.find('div', class_='downloads')
-    image_url = image_link.find('li').a['href']
+    for i in mars_hemispheres:
+        # Collect Title
+        hemisphere = i.find('div', class_="description")
+        title = hemisphere.h3.text
+        
+        # Collect image link by browsing to hemisphere page
+        hemisphere_link = hemisphere.a["href"]    
+        browser.visit(hemispheres_url + hemisphere_link)
+        
+        image_html = browser.html
+        image_soup = bs(image_html, 'html.parser')
+        
+        image_link = image_soup.find('div', class_='downloads')
+        image_url = image_link.find('li').a['href']
 
-    # Create Dictionary to store title and url info
-    image_dict = {}
-    image_dict['title'] = title
-    image_dict['img_url'] = image_url
-    
-    hemisphere_image_urls.append(image_dict)
+        # Create Dictionary to store title and url info
+        image_dict = {}
+        image_dict['title'] = title
+        image_dict['img_url'] = image_url
+        
+        hemisphere_image_urls.append(image_dict)
 
-print(hemisphere_image_urls)
+# print(hemisphere_image_urls)
 
 
 # In[21]:
 
 
-mars_dict = {
-        "news_title": news_title,
-        "news_p": news_p,
-        "featured_image_url": featured_image_url,
-        "fact_table": str(mars_html_table),
-        "hemisphere_images": hemisphere_image_urls
-    }
+    mars_dict = {
+            "news_title": news_title,
+            "news_p": news_p,
+            "featured_image_url": featured_image_url,
+            "fact_table": str(mars_html_table),
+            "hemisphere_images": hemisphere_image_urls
+        }
 
 
 # In[23]:
 
 
-mars_dict
+    return mars_dict
 
 
 # In[ ]:
-
-
-
-
